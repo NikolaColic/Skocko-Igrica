@@ -78,6 +78,12 @@ namespace ServerSkocko
                     {
                         tok1 = new NetworkStream(igrac2.Soket);
                         tok2 = new NetworkStream(igrac1.Soket);
+
+
+
+
+
+                        //ovo je komentar
                         specPoruka = false;
                         brojac++;
                         if (brojac < 2)
