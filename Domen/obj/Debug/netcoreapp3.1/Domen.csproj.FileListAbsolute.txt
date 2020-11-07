@@ -1,0 +1,9 @@
+C:\Users\PC\source\repos\SkockoGame\Domen\bin\Debug\netcoreapp3.1\Domen.deps.json
+C:\Users\PC\source\repos\SkockoGame\Domen\bin\Debug\netcoreapp3.1\Domen.dll
+C:\Users\PC\source\repos\SkockoGame\Domen\bin\Debug\netcoreapp3.1\Domen.pdb
+C:\Users\PC\source\repos\SkockoGame\Domen\obj\Debug\netcoreapp3.1\Domen.csprojAssemblyReference.cache
+C:\Users\PC\source\repos\SkockoGame\Domen\obj\Debug\netcoreapp3.1\Domen.AssemblyInfoInputs.cache
+C:\Users\PC\source\repos\SkockoGame\Domen\obj\Debug\netcoreapp3.1\Domen.AssemblyInfo.cs
+C:\Users\PC\source\repos\SkockoGame\Domen\obj\Debug\netcoreapp3.1\Domen.csproj.CoreCompileInputs.cache
+C:\Users\PC\source\repos\SkockoGame\Domen\obj\Debug\netcoreapp3.1\Domen.dll
+C:\Users\PC\source\repos\SkockoGame\Domen\obj\Debug\netcoreapp3.1\Domen.pdb
