@@ -60,7 +60,6 @@ namespace ServerSkocko
                 try
                 {
                     Socket klijentskiSoket = osluskujuciSoket.Accept();
-                    //listaSoketa.Add(klijentskiSoket);
                     new Thread(() => ObradiIme(klijentskiSoket)).Start();
                     
                 }
@@ -103,10 +102,8 @@ namespace ServerSkocko
             formatter.Serialize(tok, o);
             if (listaIgraca.Count == 2)
             {
-
                 Obrada obrada = new Obrada(listaIgraca[0], listaIgraca[1]);
                 Thread klijentNit = new Thread(obrada.ObradiZahtev);
-
                 listaIgraca.Clear();
                 klijentNit.Start();
             }

@@ -11,8 +11,7 @@ namespace ServerSkocko
 {
     public class Obrada
     {
-        //Socket igrac1;
-        //Socket igrac2;
+        
         IgracSkocko igrac1;
         IgracSkocko igrac2;
         private NetworkStream tok1;
@@ -23,15 +22,7 @@ namespace ServerSkocko
         int poenaPrvi = -5;
         int poenaDrugi = -5;
 
-        //public Obrada(Socket igrac1, Socket igrac2)
-        //{
-        //    this.igrac1 = igrac1;
-        //    this.igrac2 = igrac2;
-        //    tok2 = new NetworkStream(this.igrac2);
-        //    tok1 = new NetworkStream(this.igrac1);
-        //    formatter = new BinaryFormatter();
-        //}
-
+        
         public Obrada(IgracSkocko igrac1, IgracSkocko igrac2)
         {
             this.igrac1 = igrac1;
@@ -79,11 +70,6 @@ namespace ServerSkocko
                         tok1 = new NetworkStream(igrac2.Soket);
                         tok2 = new NetworkStream(igrac1.Soket);
 
-
-
-
-
-                        //ovo je komentar
                         specPoruka = false;
                         brojac++;
                         if (brojac < 2)
