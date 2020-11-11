@@ -38,7 +38,7 @@ namespace ServerSkocko
                 osluskujuciSoket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 //listaSoketa.Add(osluskujuciSoket);
                 IPEndPoint parametri = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 9090);
-                
+
                 osluskujuciSoket.Bind(parametri);
                 osluskujuciSoket.Listen(5);
                 new Thread(Osluskuj).Start();
@@ -61,7 +61,7 @@ namespace ServerSkocko
                 {
                     Socket klijentskiSoket = osluskujuciSoket.Accept();
                     new Thread(() => ObradiIme(klijentskiSoket)).Start();
-                    
+
                 }
                 catch (SocketException)
                 {
@@ -91,15 +91,11 @@ namespace ServerSkocko
                     throw;
                 }
             }
-            IgracSkocko igrac = new IgracSkocko();
-            igrac.Ime = ime;
-            igrac.Soket = klijentskiSoket;
+            IgracSkocko igrac =(IgracSkocko) KreirajIgraca(ime, klijentskiSoket);
             listaIgraca.Add(igrac);
-            Odgovor o = new Odgovor();
-            o.broj = 1;
-            o.Igrac = Igrac.Trazenje;
-            o.Poruka = "Trazimo protivnika!";
+            Odgovor o = (Odgovor)KreirajOdgovor("Trazimo protivnika", 1, Igrac.Trazenje);
             formatter.Serialize(tok, o);
+
             if (listaIgraca.Count == 2)
             {
                 Obrada obrada = new Obrada(listaIgraca[0], listaIgraca[1]);
@@ -110,6 +106,23 @@ namespace ServerSkocko
 
         }
 
-        
+        private object KreirajIgraca(string ime, Socket soket)
+        {
+            return new IgracSkocko()
+            {
+                Ime = ime,
+                Soket = soket
+            };
+        }
+        private object KreirajOdgovor(string poruka, int broj, Igrac igrac)
+        {
+            return new Odgovor()
+            {
+                Poruka = poruka,
+                broj = broj,
+                Igrac = igrac
+            };
+        }
+
     }
-}
+ }

@@ -9,5 +9,6 @@ namespace Domen
     {
         public Socket Soket { get; set; }
         public string Ime { get; set; }
+        public int Poena { get; set; }
     }
 }
