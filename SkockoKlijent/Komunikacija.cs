@@ -48,10 +48,7 @@ namespace SkockoKlijent
         {
             try
             {
-                Zahtev z = new Zahtev();
-                z.brojReci = broj;
-                z.rec = tekst;
-                z.kombinacija = kombinacija;
+                Zahtev z = KreirajZahtev(kombinacija, tekst, broj);
                 formatter.Serialize(tok, z);
             }
             catch (Exception)
@@ -61,6 +58,15 @@ namespace SkockoKlijent
                 Environment.Exit(0);
             }
             
+        }
+        private Zahtev KreirajZahtev(string kombinacija, string tekst, int broj)
+        {
+
+            Zahtev z = new Zahtev();
+            z.brojReci = broj;
+            z.rec = tekst;
+            z.kombinacija = kombinacija;
+            return z;
         }
 
         public void PosaljiString (string tekst)
