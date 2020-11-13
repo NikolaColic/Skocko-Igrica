@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace ServerSkocko
 {
@@ -31,7 +32,7 @@ namespace ServerSkocko
             formatter = new BinaryFormatter();
         }
 
-        public void ObradiZahtev()
+        public async Task<string> ObradiZahtev()
         {
             PosaljiOba(Kontroler.Instance.KreirajOdgovor("Igrac pocinje!", 1, Igrac.Ja));
             bool kraj = false;
@@ -82,7 +83,7 @@ namespace ServerSkocko
                             igrac2.Poena = brojPoena +2;
                             PosaljiOba(Kontroler.Instance.KreirajOdgovor($"Gotova igra prijatelji dragi!\n{Kontroler.Instance.Pobednik(igrac1.Poena,igrac1.Poena, igrac1.Ime, igrac2.Ime)} ", 1, Igrac.Protivnik));
                             PosaljiOba(Kontroler.Instance.KreirajOdgovor(Kontroler.Instance.FormirajString(igrac1.Poena, igrac2.Poena, igrac1.Ime, igrac2.Ime), 1, Igrac.Rezultat));
-                            return;
+                            return "Bravo nikola!";
                         }
                         brojPoena = 10;
                     }
@@ -92,8 +93,10 @@ namespace ServerSkocko
                     kraj = true;
                     igrac1.Soket.Close();
                     igrac2.Soket.Close();
+                    return "Nije";
                 }
             }
+            return "nik";
 
         }
 

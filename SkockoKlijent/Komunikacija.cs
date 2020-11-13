@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace SkockoKlijent
 {
@@ -83,29 +84,23 @@ namespace SkockoKlijent
 
         }
         public void PokreniNit()
+
         {
-            new Thread(PrihvatiPoruku).Start();
+
+            Task.Run(() => PrihvatiPoruku());
         }
 
         private void PrihvatiPoruku()
         {
             bool kraj = false;
-            
             while (!kraj)
             {
                 try
                 {
                     Odgovor odgovor = (Odgovor)formatter.Deserialize(tok);
-                    if (odgovor.Poruka == "Protivnik je na potezu")
-                    {
-                        formaKlijent.VisibleFalse();
-                        PozivFunkcija();
-                    }
-                    if (odgovor.Poruka == "Vi ste na potezu") 
-                    {
-                        formaKlijent.VisibleTrue();
-                        PozivFunkcija();
-                    }
+                    ProtivnikPotez(odgovor.Poruka);
+                    JaPotez(odgovor.Poruka);
+                    
                     switch (odgovor.Igrac)
                     {
                        case Igrac.Ja: formaKlijent.lblDodaj(odgovor.Poruka); break;
@@ -125,11 +120,27 @@ namespace SkockoKlijent
             }
         }
 
+        private void ProtivnikPotez(string poruka)
+        {
+            if (poruka == "Protivnik je na potezu")
+            {
+                formaKlijent.VisibleFalse();
+                PozivFunkcija();
+            }
+        }
+        private void JaPotez(string poruka)
+        {
+            if (poruka == "Vi ste na potezu")
+            {
+                formaKlijent.VisibleTrue();
+                PozivFunkcija();
+            }
+        }
+
         private void PozivFunkcija()
         {
             formaKlijent.DodajProtivnik("");
             formaKlijent.OcistiTxt();
-            //formaKlijent.VisibleTxt();
             formaKlijent.VisiblePocetni();
         }
     }

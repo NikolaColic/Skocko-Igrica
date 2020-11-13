@@ -21,10 +21,6 @@ namespace SkockoKlijent
             CheckForIllegalCrossThreadCalls = false;
         }
         public string komb = "Zvezda Karo Zvezda Karo";
-        List<TextBox> listaText = new List<TextBox>();
-
-       
-
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
 

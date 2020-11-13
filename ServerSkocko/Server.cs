@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace ServerSkocko
 {
@@ -16,6 +17,7 @@ namespace ServerSkocko
         List<Socket> listaSoketa = new List<Socket>();
         List<IgracSkocko> listaIgraca = new List<IgracSkocko>();
 
+        public object Dispacher { get; private set; }
 
         public bool ZaustaviServer()
         {
@@ -41,7 +43,8 @@ namespace ServerSkocko
 
                 osluskujuciSoket.Bind(parametri);
                 osluskujuciSoket.Listen(5);
-                new Thread(Osluskuj).Start();
+                Task.Run(() => Osluskuj());
+                //new Thread(Osluskuj).Start();
 
                 return true;
             }
@@ -60,7 +63,8 @@ namespace ServerSkocko
                 try
                 {
                     Socket klijentskiSoket = osluskujuciSoket.Accept();
-                    new Thread(() => ObradiIme(klijentskiSoket)).Start();
+                    //new Thread(() => ObradiIme(klijentskiSoket)).Start();
+                    Task.Run(() => ObradiIme(klijentskiSoket));
 
                 }
                 catch (SocketException)
@@ -82,7 +86,7 @@ namespace ServerSkocko
             {
                 try
                 {
-                    ime = (string)formatter.Deserialize(tok);
+                    ime =  (string)formatter.Deserialize(tok);
                     if (ime is null || ime.Length <= 4) continue;
                     kraj = true;
                 }
@@ -91,7 +95,7 @@ namespace ServerSkocko
                     throw;
                 }
             }
-            IgracSkocko igrac =(IgracSkocko) KreirajIgraca(ime, klijentskiSoket);
+            IgracSkocko igrac =  (IgracSkocko) KreirajIgraca(ime, klijentskiSoket);
             listaIgraca.Add(igrac);
             Odgovor o = (Odgovor)KreirajOdgovor("Trazimo protivnika", 1, Igrac.Trazenje);
             formatter.Serialize(tok, o);
@@ -99,9 +103,17 @@ namespace ServerSkocko
             if (listaIgraca.Count == 2)
             {
                 Obrada obrada = new Obrada(listaIgraca[0], listaIgraca[1]);
-                Thread klijentNit = new Thread(obrada.ObradiZahtev);
+                
+                //Thread klijentNit = new Thread(obrada.ObradiZahtev);
                 listaIgraca.Clear();
-                klijentNit.Start();
+                var rezultat = Task.Run(async() => await obrada.ObradiZahtev());
+                rezultat.ContinueWith((t) =>
+                {
+                    var rez = t.Result.ToString();
+                    formatter.Serialize(tok,KreirajOdgovor(rez, 1, Igrac.Trazenje));
+                });
+
+                //klijentNit.Start();
             }
 
         }
