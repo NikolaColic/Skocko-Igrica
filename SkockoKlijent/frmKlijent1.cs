@@ -170,8 +170,7 @@ namespace SkockoKlijent
             txtTreca.Text = "";
             txtCetvrta.Text = "";
             txtPeta.Text = "";
-            lblRezultat.Text = "Igra pocinje! Srecno!";
-            Komunikacija.Instance.PosaljiPoruku("", "resetuj", 1);
+            Komunikacija.Instance.PosaljiPoruku("", "RESETUJ", 1);
         }
 
         public void VisibleFalse()

@@ -203,7 +203,6 @@
             this.btnResetuj.TabIndex = 0;
             this.btnResetuj.Text = "Resetuj";
             this.btnResetuj.UseVisualStyleBackColor = false;
-            this.btnResetuj.Visible = false;
             this.btnResetuj.Click += new System.EventHandler(this.btnResetuj_Click_1);
             // 
             // lblProtivnik

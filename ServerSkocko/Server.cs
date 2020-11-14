@@ -14,16 +14,15 @@ namespace ServerSkocko
     {
 
         Socket osluskujuciSoket;
-        List<Socket> listaSoketa = new List<Socket>();
         List<IgracSkocko> listaIgraca = new List<IgracSkocko>();
-
-        public object Dispacher { get; private set; }
-
+        CancellationTokenSource token = null;
         public bool ZaustaviServer()
         {
             try
             {
-                listaSoketa.ForEach((sok) => sok.Close());
+                listaIgraca.ForEach((sok) => sok.Soket.Close());
+                token.Cancel();
+                token = null;
                 osluskujuciSoket.Close();
                 return true;
             }
@@ -38,7 +37,6 @@ namespace ServerSkocko
             try
             {
                 osluskujuciSoket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                //listaSoketa.Add(osluskujuciSoket);
                 IPEndPoint parametri = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 9090);
 
                 osluskujuciSoket.Bind(parametri);
@@ -65,12 +63,10 @@ namespace ServerSkocko
                     Socket klijentskiSoket = osluskujuciSoket.Accept();
                     //new Thread(() => ObradiIme(klijentskiSoket)).Start();
                     Task.Run(() => ObradiIme(klijentskiSoket));
-
                 }
                 catch (SocketException)
                 {
                     kraj = true;
-
                 }
             }
 
@@ -78,6 +74,7 @@ namespace ServerSkocko
         }
         public void ObradiIme(Socket klijentskiSoket)
         {
+           
             BinaryFormatter formatter = new BinaryFormatter();
             NetworkStream tok = new NetworkStream(klijentskiSoket);
             bool kraj = false;
@@ -88,6 +85,7 @@ namespace ServerSkocko
                 {
                     ime =  (string)formatter.Deserialize(tok);
                     if (ime is null || ime.Length <= 4) continue;
+                    
                     kraj = true;
                 }
                 catch (Exception)
@@ -95,25 +93,39 @@ namespace ServerSkocko
                     throw;
                 }
             }
-            IgracSkocko igrac =  (IgracSkocko) KreirajIgraca(ime, klijentskiSoket);
+            IgracSkocko igrac = null;
+            if (ime == "RESETUJ")
+            {
+                listaIgraca.ForEach((igrac2) =>
+                {
+                    if(igrac2.Soket == klijentskiSoket)
+                    {
+                        igrac = igrac2;
+                    }
+                });
+            }
+            igrac = igrac is null ? (IgracSkocko)KreirajIgraca(ime, klijentskiSoket) : igrac;
             listaIgraca.Add(igrac);
             Odgovor o = (Odgovor)KreirajOdgovor("Trazimo protivnika", 1, Igrac.Trazenje);
             formatter.Serialize(tok, o);
 
-            if (listaIgraca.Count == 2)
+            if (listaIgraca.Count % 2 == 0)
             {
+                token = new CancellationTokenSource();
+                IgracSkocko prviIgrac = listaIgraca[0];
+                IgracSkocko drugiIgrac = listaIgraca[1];
                 Obrada obrada = new Obrada(listaIgraca[0], listaIgraca[1]);
-                
-                //Thread klijentNit = new Thread(obrada.ObradiZahtev);
-                listaIgraca.Clear();
-                var rezultat = Task.Run(async() => await obrada.ObradiZahtev());
-                rezultat.ContinueWith((t) =>
-                {
-                    var rez = t.Result.ToString();
-                    formatter.Serialize(tok,KreirajOdgovor(rez, 1, Igrac.Trazenje));
-                });
+                var rezultat = Task.Run(()=>obrada.ObradiZahtev(token.Token), token.Token);
 
-                //klijentNit.Start();
+                //Thread klijentNit = new Thread(obrada.ObradiZahtev);
+                //listaIgraca.Clear();
+                //var vreme = Task.Delay(5000);
+
+                //var rez = await Task.WhenAny(rezultat, vreme);
+                //if(rez ==vreme)
+                //{
+                //    formatter.Serialize(tok, KreirajOdgovor("Isteklo vreme", 1, Igrac.Ja));
+                //}
             }
 
         }
