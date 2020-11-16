@@ -47,6 +47,7 @@
             this.lblTrazenje = new System.Windows.Forms.Label();
             this.txtIme = new System.Windows.Forms.TextBox();
             this.lblRez = new System.Windows.Forms.Label();
+            this.lblVreme = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // btnZvezda
@@ -267,12 +268,23 @@
             this.lblRez.Size = new System.Drawing.Size(0, 28);
             this.lblRez.TabIndex = 7;
             // 
+            // lblVreme
+            // 
+            this.lblVreme.AutoSize = true;
+            this.lblVreme.Font = new System.Drawing.Font("Segoe UI", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lblVreme.ForeColor = System.Drawing.Color.DarkViolet;
+            this.lblVreme.Location = new System.Drawing.Point(61, 116);
+            this.lblVreme.Name = "lblVreme";
+            this.lblVreme.Size = new System.Drawing.Size(0, 25);
+            this.lblVreme.TabIndex = 8;
+            // 
             // frmKlijent1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.PaleTurquoise;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.lblVreme);
             this.Controls.Add(this.lblRez);
             this.Controls.Add(this.txtIme);
             this.Controls.Add(this.lblTrazenje);
@@ -322,5 +334,6 @@
         private System.Windows.Forms.Label lblTrazenje;
         private System.Windows.Forms.TextBox txtIme;
         private System.Windows.Forms.Label lblRez;
+        private System.Windows.Forms.Label lblVreme;
     }
 }

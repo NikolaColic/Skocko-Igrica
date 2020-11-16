@@ -20,8 +20,8 @@ namespace ServerSkocko
         private BinaryFormatter formatter;
         public string komb = "Zvezda Karo Zvezda Karo";
         int brojPoena = 10;
-        
-        public Obrada(IgracSkocko igrac1, IgracSkocko igrac2)
+        List<IgracSkocko> listaIgraca = null;
+        public Obrada(IgracSkocko igrac1, IgracSkocko igrac2, List<IgracSkocko> listaIgraca)
         {
             this.igrac1 = igrac1;
             this.igrac2 = igrac2;
@@ -30,10 +30,11 @@ namespace ServerSkocko
             tok2 = new NetworkStream(this.igrac2.Soket);
             tok1 = new NetworkStream(this.igrac1.Soket);
             formatter = new BinaryFormatter();
+            this.listaIgraca = listaIgraca;
             
         }
 
-        public void ObradiZahtev(CancellationToken token)
+        public void ObradiZahtev()
         {
 
             PosaljiOba(Kontroler.Instance.KreirajOdgovor("Igrac pocinje!", 1, Igrac.Ja));
@@ -44,10 +45,6 @@ namespace ServerSkocko
             {
                 try
                 {
-                    if (token.IsCancellationRequested )
-                    {
-                        return;
-                    }
                     if (!specPoruka)
                     {
                         Thread.Sleep(2000);
@@ -57,34 +54,25 @@ namespace ServerSkocko
                         specPoruka = true;
                     }
                     Zahtev poruka = (Zahtev)formatter.Deserialize(tok1);
-                    PosaljiJednom(tok2, Kontroler.Instance.KreirajOdgovor(poruka.kombinacija, Kontroler.Instance.ProveraBrojText(brojPoena), Igrac.Kombinacija));
+                    if(poruka.kombinacija == "isteklo")
+                    {
+                        SmenaIgraca(ref brojac, ref specPoruka);
+                        if (brojac == 2) return;
 
+                        continue;
+                    }
+                    PosaljiJednom(tok2, Kontroler.Instance.KreirajOdgovor(poruka.kombinacija, Kontroler.Instance.ProveraBrojText(brojPoena), Igrac.Kombinacija));
                     string tekst = Kontroler.Instance.Provera(poruka, ref brojPoena, komb);
                     PosaljiJednom(tok1,Kontroler.Instance.KreirajOdgovor(tekst,1, Igrac.Ja));
                     PosaljiJednom(tok2,Kontroler.Instance.KreirajOdgovor("Protivnik je ostvario sledeci rezultat:\n" + tekst, 1, Igrac.Protivnik));
 
                     if (tekst.Contains("Cestitamo") || brojPoena == 0)
                     {
-                        tok1 = new NetworkStream(igrac2.Soket);
-                        tok2 = new NetworkStream(igrac1.Soket);
-                        specPoruka = false;
-                        brojac++;
-                        if (brojac < 2)
-                        {
-                            igrac1.Poena = brojPoena + 2;
-                            PosaljiOba(Kontroler.Instance.KreirajOdgovor(Kontroler.Instance.FormirajString(igrac1.Poena, 0, igrac1.Ime, igrac2.Ime), 1, Igrac.Rezultat));
-                        }
+                        SmenaIgraca(ref brojac, ref specPoruka);
+                        if (brojac == 2) return;
 
-                        if (brojac == 2)
-                        {
-                            Thread.Sleep(3000);
-                            igrac2.Poena = brojPoena +2;
-                            PosaljiOba(Kontroler.Instance.KreirajOdgovor($"Gotova igra prijatelji dragi!\n{Kontroler.Instance.Pobednik(igrac1.Poena, igrac2.Poena, igrac1.Ime, igrac2.Ime)} ", 1, Igrac.Protivnik));
-                            PosaljiOba(Kontroler.Instance.KreirajOdgovor(Kontroler.Instance.FormirajString(igrac1.Poena, igrac2.Poena, igrac1.Ime, igrac2.Ime), 1, Igrac.Rezultat));
-                            return;
-                        }
-                        brojPoena = 10;
                     }
+                   
                 }
                 catch (Exception)
                 {
@@ -97,6 +85,30 @@ namespace ServerSkocko
            
         }
 
+        private void SmenaIgraca(ref int brojac, ref bool specPoruka)
+        {
+            tok1 = new NetworkStream(igrac2.Soket);
+            tok2 = new NetworkStream(igrac1.Soket);
+            specPoruka = false;
+            brojac++;
+            if (brojac < 2)
+            {
+                igrac1.Poena = brojPoena + 2;
+                PosaljiOba(Kontroler.Instance.KreirajOdgovor(Kontroler.Instance.FormirajString(igrac1.Poena, 0, igrac1.Ime, igrac2.Ime), 1, Igrac.Rezultat));
+            }
+
+            if (brojac == 2)
+            {
+                Thread.Sleep(3000);
+                igrac2.Poena = brojPoena + 2;
+                PosaljiOba(Kontroler.Instance.KreirajOdgovor($"Gotova igra prijatelji dragi!\n{Kontroler.Instance.Pobednik(igrac1.Poena, igrac2.Poena, igrac1.Ime, igrac2.Ime)} ", 1, Igrac.Protivnik));
+                PosaljiOba(Kontroler.Instance.KreirajOdgovor(Kontroler.Instance.FormirajString(igrac1.Poena, igrac2.Poena, igrac1.Ime, igrac2.Ime), 1, Igrac.Rezultat));
+                Task.Run(() => ObradiReset(igrac1, tok2, formatter));
+                Task.Run(() => ObradiReset(igrac2, tok1, formatter));
+                return;
+            }
+            brojPoena = 10;
+        }
        
         private void PosaljiOba(Odgovor o)
         {
@@ -107,6 +119,20 @@ namespace ServerSkocko
         {
             formatter.Serialize(tok, o);
             
+        }
+
+        private void ObradiReset(IgracSkocko igrac, NetworkStream tokIgrac, BinaryFormatter formaterIgrac)
+        {
+            Zahtev z = (Zahtev)formaterIgrac.Deserialize(tokIgrac);
+            if (z.rec == "RESETUJ") listaIgraca.Add(igrac);
+            if (listaIgraca.Count % 2 == 0)
+            {
+                //ovde ne radi zato sto on svakako posalje ISTEKLO kada istekne vreme.
+                //moram cancel taskova da naucim
+                Obrada obrada = new Obrada(listaIgraca[0], listaIgraca[1], listaIgraca);
+                var rezultat = Task.Run(() => obrada.ObradiZahtev());
+                listaIgraca.Clear();
+            }
         }
        
 

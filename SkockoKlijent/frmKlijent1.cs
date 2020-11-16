@@ -34,6 +34,15 @@ namespace SkockoKlijent
         {
             lblRezultat.Text = tekst;
         }
+        public void lblVremeIgre(int broj)
+        {
+            if (broj == 0)
+            {
+                lblVreme.Text = "Isteklo vreme igre!";
+                return;
+            }
+            lblVreme.Text = broj + "";
+        }
         public void lblRezu(string tekst)
         {
             lblRez.Text = tekst;

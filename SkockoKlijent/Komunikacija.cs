@@ -107,7 +107,7 @@ namespace SkockoKlijent
                        case Igrac.Protivnik: formaKlijent.DodajProtivnik(odgovor.Poruka); break;
                        case Igrac.Kombinacija: formaKlijent.PopuniTxt(odgovor.Poruka, odgovor.broj); break;
                        case Igrac.Trazenje: formaKlijent.DodajTrazenje(odgovor.Poruka); break;
-                        case Igrac.Rezultat: formaKlijent.lblRezu(odgovor.Poruka); break; 
+                       case Igrac.Rezultat: formaKlijent.lblRezu(odgovor.Poruka); break; 
                     }
                 }
                 catch (Exception)
@@ -124,6 +124,7 @@ namespace SkockoKlijent
         {
             if (poruka == "Protivnik je na potezu")
             {
+                VremeIgre(false);
                 formaKlijent.VisibleFalse();
                 PozivFunkcija();
             }
@@ -133,8 +134,21 @@ namespace SkockoKlijent
             if (poruka == "Vi ste na potezu")
             {
                 formaKlijent.VisibleTrue();
+                VremeIgre(true);
                 PozivFunkcija();
             }
+        }
+        private void VremeIgre(bool potez)
+        {
+            Task.Run(async () =>
+            {
+                for (int i = 10; i >= 0; i--)
+                {
+                    await Task.Delay(1000);
+                    if (i == 0 && potez) PosaljiPoruku("isteklo", "tekst", 1);
+                    formaKlijent.lblVremeIgre(i);
+                }
+            });
         }
 
         private void PozivFunkcija()

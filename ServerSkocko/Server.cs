@@ -72,7 +72,7 @@ namespace ServerSkocko
 
 
         }
-        public void ObradiIme(Socket klijentskiSoket)
+        public async Task ObradiIme(Socket klijentskiSoket)
         {
            
             BinaryFormatter formatter = new BinaryFormatter();
@@ -93,39 +93,34 @@ namespace ServerSkocko
                     throw;
                 }
             }
-            IgracSkocko igrac = null;
-            if (ime == "RESETUJ")
-            {
-                listaIgraca.ForEach((igrac2) =>
-                {
-                    if(igrac2.Soket == klijentskiSoket)
-                    {
-                        igrac = igrac2;
-                    }
-                });
-            }
-            igrac = igrac is null ? (IgracSkocko)KreirajIgraca(ime, klijentskiSoket) : igrac;
+
+            IgracSkocko igrac = (IgracSkocko)KreirajIgraca(ime, klijentskiSoket);
             listaIgraca.Add(igrac);
             Odgovor o = (Odgovor)KreirajOdgovor("Trazimo protivnika", 1, Igrac.Trazenje);
             formatter.Serialize(tok, o);
 
             if (listaIgraca.Count % 2 == 0)
             {
-                token = new CancellationTokenSource();
+               
                 IgracSkocko prviIgrac = listaIgraca[0];
                 IgracSkocko drugiIgrac = listaIgraca[1];
-                Obrada obrada = new Obrada(listaIgraca[0], listaIgraca[1]);
-                var rezultat = Task.Run(()=>obrada.ObradiZahtev(token.Token), token.Token);
-
+                Obrada obrada = new Obrada(listaIgraca[0], listaIgraca[1], listaIgraca);
+                var rezultat = Task.Run(()=>obrada.ObradiZahtev());
+                listaIgraca.Clear();
                 //Thread klijentNit = new Thread(obrada.ObradiZahtev);
-                //listaIgraca.Clear();
-                //var vreme = Task.Delay(5000);
+                var vreme = Task.Run(async () =>
+                {
+                    for (int i = 10; i >= 0; i--)
+                    {
+                        await Task.Delay(1000);
+                    }
+                });
 
-                //var rez = await Task.WhenAny(rezultat, vreme);
-                //if(rez ==vreme)
-                //{
-                //    formatter.Serialize(tok, KreirajOdgovor("Isteklo vreme", 1, Igrac.Ja));
-                //}
+                var rez = await Task.WhenAny(rezultat, vreme);
+                if (rez == vreme)
+                {
+                    formatter.Serialize(tok, KreirajOdgovor("Isteklo vreme", 1, Igrac.Ja));
+                }
             }
 
         }
